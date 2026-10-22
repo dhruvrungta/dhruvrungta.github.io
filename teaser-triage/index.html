@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Teaser Triage</title>
+<meta name="description" content="An internal web app that screens cross-border M&A teaser decks for India-relevant deals, built by Dhruv Rungta for Rungta Advisors.">
+<meta property="og:title" content="Teaser Triage">
+<meta property="og:description" content="An internal web app that screens cross-border M&A teaser decks for India-relevant deals, built by Dhruv Rungta for Rungta Advisors.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2F4F7; --surface:#FFFFFF; --ink:#132033; --muted:#5A6577; --rule:#D2D8E0;
+  --signal:#1F4FD8; --signal-soft:#DCE5FB; --amber:#B97F00; --empty:#B8C1CD;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1622; --surface:#152032; --ink:#E6EBF2; --muted:#9AA6B7; --rule:#29374D;
+    --signal:#7FA3FF; --signal-soft:#1D2D52; --amber:#E2B544; --empty:#3B4A62;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1622; --surface:#152032; --ink:#E6EBF2; --muted:#9AA6B7; --rule:#29374D;
+  --signal:#7FA3FF; --signal-soft:#1D2D52; --amber:#E2B544; --empty:#3B4A62;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:1.0625rem;line-height:1.6;font-feature-settings:"tnum" 1;}
+a{color:var(--signal);text-underline-offset:.18em;text-decoration-thickness:1px}
+a:hover{text-decoration-thickness:2px}
+a:focus-visible{outline:2px solid var(--signal);outline-offset:3px;border-radius:2px}
+.wrap{max-width:66rem;margin:0 auto;padding:0 16px}
+@media (min-width:720px){.wrap{padding:0 32px}}
+.measure{max-width:42rem}
+header.site{display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+  padding:20px 0;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+header.site .name{font-weight:700;color:var(--ink);text-decoration:none}
+header.site nav{display:flex;gap:20px;flex-wrap:wrap;font-size:.95rem}
+header.site nav a{color:var(--muted);text-decoration:none}
+header.site nav a:hover,header.site nav a[aria-current]{color:var(--ink)}
+h1{font-size:clamp(2.6rem,7vw,4.6rem);line-height:1;letter-spacing:-.035em;font-weight:800;margin:56px 0 20px}
+.lede{font-size:1.3rem;line-height:1.5;color:var(--ink);margin:0 0 32px;max-width:40rem}
+dl.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:4px 32px;margin:0 0 48px;
+  padding:16px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+dl.facts div{padding:8px 0}
+dl.facts dt{color:var(--muted);font-size:.9rem}
+dl.facts dd{margin:0;font-weight:600}
+h2{font-size:1.75rem;line-height:1.2;letter-spacing:-.02em;font-weight:800;margin:72px 0 16px}
+h3{font-size:1.1rem;margin:0 0 4px;font-weight:700}
+p{margin:0 0 16px}
+figure.hero{margin:0;background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:24px 20px 20px}
+@media (min-width:720px){figure.hero{padding:32px 32px 24px}}
+.hero-title{font-size:clamp(1.5rem,3.4vw,2.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.15;margin:0 0 24px}
+figcaption{color:var(--muted);font-size:.95rem;margin-top:20px;max-width:46rem}
+.key{display:flex;gap:20px;flex-wrap:wrap;font-size:.9rem;color:var(--muted);margin:0 0 20px}
+.key span{display:inline-flex;align-items:center;gap:8px}
+/* Deal Radar sieve */
+.sieve{display:grid;gap:10px}
+.srow{display:grid;grid-template-columns:1fr;gap:4px}
+@media (min-width:720px){.srow{grid-template-columns:15.5rem 1fr;gap:16px;align-items:center}.slabel{white-space:nowrap}}
+.slabel{font-size:.92rem}
+.slabel b{font-weight:600}
+.slabel small{color:var(--muted);font-size:.85rem;margin-left:6px}
+.dots{display:flex;flex-wrap:wrap;gap:3px}
+.d{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--empty)}
+.d.on{background:var(--signal);border-color:var(--signal)}
+/* Teaser Triage piles */
+.piles{display:grid;gap:28px}
+@media (min-width:760px){.piles{grid-template-columns:repeat(3,1fr);gap:24px}}
+.pile h3{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:12px}
+.pile h3 small{font-weight:400;color:var(--muted);font-size:.9rem}
+.pile p{font-size:.9rem;color:var(--muted);margin:10px 0 0}
+.pile.quick h3{border-color:var(--amber)}
+.pile.skip h3{border-color:var(--empty)}
+.tiles{display:flex;flex-wrap:wrap;gap:4px}
+.t{width:16px;height:12px;border-radius:2px;border:1.5px solid var(--empty)}
+.t.on{background:var(--signal);border-color:var(--signal)}
+.pile .zero{font-weight:700;color:var(--ink)}
+/* steps */
+ol.steps{list-style:none;padding:0;margin:0;counter-reset:s;border-left:2px solid var(--rule)}
+ol.steps li{counter-increment:s;position:relative;padding:0 0 22px 28px}
+ol.steps li::before{content:counter(s);position:absolute;left:-13px;top:0;width:24px;height:24px;border-radius:50%;
+  background:var(--paper);border:2px solid var(--ink);font-size:.8rem;font-weight:700;display:grid;place-items:center;line-height:1}
+ol.steps li:last-child{padding-bottom:0}
+ol.steps p{margin:0;color:var(--muted)}
+.decisions{display:grid;gap:28px;margin-top:8px}
+@media (min-width:760px){.decisions{grid-template-columns:1fr 1fr;gap:32px 48px}}
+.decisions p{color:var(--muted);margin:0}
+.numbers{display:grid;gap:0;border-top:1px solid var(--rule);margin-top:8px}
+.num{display:grid;grid-template-columns:1fr;gap:2px;padding:16px 0;border-bottom:1px solid var(--rule)}
+@media (min-width:720px){.num{grid-template-columns:11rem 1fr;gap:24px;align-items:baseline}}
+.num strong{font-size:1.9rem;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.num span{color:var(--muted)}
+.bars{display:grid;gap:8px;margin:8px 0 0;max-width:40rem}
+.bar{display:grid;grid-template-columns:9rem 1fr 2.5rem;gap:12px;align-items:center;font-size:.92rem}
+.bar i{display:block;height:10px;background:var(--signal);border-radius:1px}
+.bar em{font-style:normal;text-align:right;color:var(--muted)}
+ul.plain{padding-left:1.1rem;margin:0}
+ul.plain li{margin:0 0 8px;color:var(--muted)}
+ul.plain li b{color:var(--ink);font-weight:600}
+.stack{display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:8px 0 0;list-style:none}
+.stack li{border:1px solid var(--rule);border-radius:4px;padding:3px 10px;font-size:.92rem;background:var(--surface)}
+footer.site{margin-top:96px;padding:28px 0 48px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--muted);font-size:.95rem}
+footer.site nav{display:flex;gap:20px;flex-wrap:wrap}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* index */
+.projects{list-style:none;padding:0;margin:8px 0 0;border-top:1px solid var(--rule)}
+.projects li{padding:24px 0;border-bottom:1px solid var(--rule)}
+.projects a.title{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;color:var(--ink);text-decoration:none}
+.projects a.title:hover{color:var(--signal)}
+.projects p{color:var(--muted);margin:6px 0 0;max-width:42rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="name" href="../">Dhruv Rungta</a>
+  <nav aria-label="Projects">
+    <a href="../teaser-triage/" aria-current="page">Teaser Triage</a>
+    <a href="../deal-radar/">RA Deal Radar</a>
+    <a href="https://github.com/dhruvrungta/MAtCh">MAtCh</a>
+    <a href="https://github.com/dhruvrungta">GitHub</a>
+  </nav>
+</header>
+<main>
+<h1>Teaser Triage</h1>
+<p class="lede">Rungta Advisors receives decks of cross-border deal teasers, one opportunity per slide. Teaser Triage reads every slide and shortlists the ones where an Indian buyer, seller or investor could fit, and it is built so it never quietly drops a deal an analyst would want.</p>
+<dl class="facts"><div><dt>Built for</dt><dd>Rungta Advisors' analyst team</dd></div><div><dt>My role</dt><dd>Sole builder, from scoping to deployment</dd></div><div><dt>Built with</dt><dd>Claude Code</dd></div><div><dt>Runs</dt><dd>Web app with analyst logins, packaged with Docker</dd></div></dl>
+
+<figure class="hero" aria-label="132 analyst-labelled slides: 46 shortlisted with 32 relevant, 50 sent to quick check with 5 relevant, 36 skipped with none relevant.">
+  <p class="hero-title"><span class="in">132 slides, labelled by analysts:</span> every relevant one was kept.</p>
+  <div class="key"><span><i class="t on"></i> Analyst marked it relevant</span><span><i class="t"></i> Analyst marked it not relevant</span></div>
+  <div class="piles"><div class="pile short"><h3>Shortlist<small>32 of 46 relevant</small></h3><div class="tiles" aria-hidden="true"><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i></div><p>Clear India angle. Analysts confirm these first.</p></div><div class="pile quick"><h3>Quick check<small>5 of 50 relevant</small></h3><div class="tiles" aria-hidden="true"><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t on"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i></div><p>The models couldn't settle these, so an analyst decides. Most likely first.</p></div><div class="pile skip"><h3>Skipped<small>0 of 36 relevant</small></h3><div class="tiles" aria-hidden="true"><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i><i class="t"></i></div><p><span class="zero">0 relevant slides.</span> Skipped only when a hard rule applied and both models agreed.</p></div></div>
+  <figcaption>Four real decks across four sectors. Analysts labelled every slide themselves, two of the decks blind before the tool ran, so the results weren't tuned to the answers. All 37 relevant slides landed in Shortlist or Quick check, and the 36 skipped slides needed no reading at all.</figcaption>
+</figure>
+
+<section class="measure">
+<h2>The problem</h2>
+<p>A teaser deck can run to 60 slides, and most opportunities have nothing to do with India. Reading every slide carefully is slow; skimming risks missing the one opportunity that matters, and in M&amp;A advisory a missed deal costs far more than an extra minute of reading.</p>
+<p>So the brief was not "find the relevant slides". It was "cut the reading without ever losing a relevant slide".</p>
+</section>
+
+<section class="measure">
+<h2>How it works</h2>
+<ol class="steps"><li><h3>Split the deck</h3><p>The PDF is split into slides. Each slide's text is extracted and an image is rendered, and slides that are mostly pictures are flagged.</p></li><li><h3>Ask narrow questions</h3><p>A small decision model (TypeSafe's Jev) answers 13 specific questions per slide: deal type, India angle, buyer regions, company region, business type, profitability, sector, revenue band and market.</p></li><li><h3>Route with rules</h3><p>Plain code turns those answers into a route. A hard rule, such as 'buyer regions listed without India', can skip a slide only when the model is at least 90% sure and the slide shows no Indian angle.</p></li><li><h3>Escalate the unclear ones</h3><p>Slides the rules can't settle go to Claude Haiku with the slide image, its text and the first model's answers. A skip must name a rule that the first model also backs; otherwise the slide stays with an analyst.</p></li><li><h3>Review and export</h3><p>Analysts work through three piles with keyboard shortcuts, label slides, and export the relevant ones as a branded PDF or CSV. Their labels feed the evaluation page.</p></li></ol>
+</section>
+
+<section>
+<h2 class="measure">Decisions I made</h2>
+<div class="decisions"><div><h3>Recall first, everywhere</h3><p>Every rule is biased toward keeping a slide. Doubtful slides go to Quick check rather than Skipped, and a skip needs two independent signals to agree.</p></div><div><h3>Switched off the stronger model</h3><p>A second pass with a larger model looked like an upgrade, but in testing it skipped two deals the analysts wanted. It's off by default.</p></div><div><h3>Measure against analysts, not intuition</h3><p>An evaluation page reports recall, precision and threshold sweeps against analyst labels. Two decks were labelled blind so improvements couldn't be tuned to the test set. Every prompt or rule change is re-checked to keep recall at 100%.</p></div><div><h3>Treat teasers as confidential</h3><p>Live model calls refuse to run until zero-data-retention is confirmed with both providers. Logins use argon2 hashing, rate limiting and CSRF protection, and the app stays out of search engines.</p></div></div>
+</section>
+
+<section>
+<h2 class="measure">Results so far</h2>
+<div class="numbers"><div class="num"><strong>100%</strong><span>Recall: all 37 slides analysts marked relevant were kept, across 132 labelled slides in four decks.</span></div><div class="num"><strong>27%</strong><span>Of slides cleared without reading (36 of 132), none of them relevant.</span></div><div class="num"><strong>$0.07</strong><span>Per 100 slides in model costs: about $0.016 for the first model and $0.055 for Claude. Re-runs reuse cached answers and cost nothing.</span></div><div class="num"><strong>17 s</strong><span>To triage a 31-slide deck end to end.</span></div></div>
+</section>
+
+<section class="measure">
+<h2>What I'd do next</h2>
+<ul class="plain">
+  <li><b>Shrink Quick check.</b> 45 of its 50 slides weren't relevant. Tighter per-sector rules could send more of them to Skipped, as long as recall stays at 100%.</li>
+  <li><b>Label more decks per sector.</b> A sector needs at least two labelled decks before its numbers mean much, and so far each has one.</li>
+  <li><b>Hand the shortlist to a matching step</b> that suggests specific Indian buyers or targets for each relevant opportunity.</li>
+</ul>
+</section>
+
+<section class="measure">
+<h2>Stack</h2>
+<ul class="stack"><li>Python</li><li>FastAPI</li><li>HTMX</li><li>Tailwind CSS</li><li>PyMuPDF</li><li>SQLModel</li><li>TypeSafe Jev</li><li>Claude Haiku</li><li>Docker</li><li>Caddy</li><li>pytest</li><li>Claude Code</li></ul>
+</section>
+</main>
+<footer class="site">
+  <span>Dhruv Rungta, B.Tech IT at VIT Vellore</span>
+  <nav aria-label="Contact">
+    <a href="mailto:itzdhruvrungta@gmail.com">Email</a>
+    <a href="https://www.linkedin.com/in/dhruvrungta-95ba17289">LinkedIn</a>
+    <a href="https://github.com/dhruvrungta">GitHub</a>
+  </nav>
+</footer>
+</div>
+</body>
+</html>

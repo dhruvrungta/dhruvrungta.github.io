@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dhruv Rungta</title>
+<meta name="description" content="Projects by Dhruv Rungta: Teaser Triage, RA Deal Radar and MAtCh.">
+<meta property="og:title" content="Dhruv Rungta">
+<meta property="og:description" content="Projects by Dhruv Rungta: Teaser Triage, RA Deal Radar and MAtCh.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2F4F7; --surface:#FFFFFF; --ink:#132033; --muted:#5A6577; --rule:#D2D8E0;
+  --signal:#1F4FD8; --signal-soft:#DCE5FB; --amber:#B97F00; --empty:#B8C1CD;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1622; --surface:#152032; --ink:#E6EBF2; --muted:#9AA6B7; --rule:#29374D;
+    --signal:#7FA3FF; --signal-soft:#1D2D52; --amber:#E2B544; --empty:#3B4A62;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1622; --surface:#152032; --ink:#E6EBF2; --muted:#9AA6B7; --rule:#29374D;
+  --signal:#7FA3FF; --signal-soft:#1D2D52; --amber:#E2B544; --empty:#3B4A62;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:1.0625rem;line-height:1.6;font-feature-settings:"tnum" 1;}
+a{color:var(--signal);text-underline-offset:.18em;text-decoration-thickness:1px}
+a:hover{text-decoration-thickness:2px}
+a:focus-visible{outline:2px solid var(--signal);outline-offset:3px;border-radius:2px}
+.wrap{max-width:66rem;margin:0 auto;padding:0 16px}
+@media (min-width:720px){.wrap{padding:0 32px}}
+.measure{max-width:42rem}
+header.site{display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+  padding:20px 0;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+header.site .name{font-weight:700;color:var(--ink);text-decoration:none}
+header.site nav{display:flex;gap:20px;flex-wrap:wrap;font-size:.95rem}
+header.site nav a{color:var(--muted);text-decoration:none}
+header.site nav a:hover,header.site nav a[aria-current]{color:var(--ink)}
+h1{font-size:clamp(2.6rem,7vw,4.6rem);line-height:1;letter-spacing:-.035em;font-weight:800;margin:56px 0 20px}
+.lede{font-size:1.3rem;line-height:1.5;color:var(--ink);margin:0 0 32px;max-width:40rem}
+dl.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:4px 32px;margin:0 0 48px;
+  padding:16px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+dl.facts div{padding:8px 0}
+dl.facts dt{color:var(--muted);font-size:.9rem}
+dl.facts dd{margin:0;font-weight:600}
+h2{font-size:1.75rem;line-height:1.2;letter-spacing:-.02em;font-weight:800;margin:72px 0 16px}
+h3{font-size:1.1rem;margin:0 0 4px;font-weight:700}
+p{margin:0 0 16px}
+figure.hero{margin:0;background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:24px 20px 20px}
+@media (min-width:720px){figure.hero{padding:32px 32px 24px}}
+.hero-title{font-size:clamp(1.5rem,3.4vw,2.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.15;margin:0 0 24px}
+figcaption{color:var(--muted);font-size:.95rem;margin-top:20px;max-width:46rem}
+.key{display:flex;gap:20px;flex-wrap:wrap;font-size:.9rem;color:var(--muted);margin:0 0 20px}
+.key span{display:inline-flex;align-items:center;gap:8px}
+/* Deal Radar sieve */
+.sieve{display:grid;gap:10px}
+.srow{display:grid;grid-template-columns:1fr;gap:4px}
+@media (min-width:720px){.srow{grid-template-columns:15.5rem 1fr;gap:16px;align-items:center}.slabel{white-space:nowrap}}
+.slabel{font-size:.92rem}
+.slabel b{font-weight:600}
+.slabel small{color:var(--muted);font-size:.85rem;margin-left:6px}
+.dots{display:flex;flex-wrap:wrap;gap:3px}
+.d{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--empty)}
+.d.on{background:var(--signal);border-color:var(--signal)}
+/* Teaser Triage piles */
+.piles{display:grid;gap:28px}
+@media (min-width:760px){.piles{grid-template-columns:repeat(3,1fr);gap:24px}}
+.pile h3{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:12px}
+.pile h3 small{font-weight:400;color:var(--muted);font-size:.9rem}
+.pile p{font-size:.9rem;color:var(--muted);margin:10px 0 0}
+.pile.quick h3{border-color:var(--amber)}
+.pile.skip h3{border-color:var(--empty)}
+.tiles{display:flex;flex-wrap:wrap;gap:4px}
+.t{width:16px;height:12px;border-radius:2px;border:1.5px solid var(--empty)}
+.t.on{background:var(--signal);border-color:var(--signal)}
+.pile .zero{font-weight:700;color:var(--ink)}
+/* steps */
+ol.steps{list-style:none;padding:0;margin:0;counter-reset:s;border-left:2px solid var(--rule)}
+ol.steps li{counter-increment:s;position:relative;padding:0 0 22px 28px}
+ol.steps li::before{content:counter(s);position:absolute;left:-13px;top:0;width:24px;height:24px;border-radius:50%;
+  background:var(--paper);border:2px solid var(--ink);font-size:.8rem;font-weight:700;display:grid;place-items:center;line-height:1}
+ol.steps li:last-child{padding-bottom:0}
+ol.steps p{margin:0;color:var(--muted)}
+.decisions{display:grid;gap:28px;margin-top:8px}
+@media (min-width:760px){.decisions{grid-template-columns:1fr 1fr;gap:32px 48px}}
+.decisions p{color:var(--muted);margin:0}
+.numbers{display:grid;gap:0;border-top:1px solid var(--rule);margin-top:8px}
+.num{display:grid;grid-template-columns:1fr;gap:2px;padding:16px 0;border-bottom:1px solid var(--rule)}
+@media (min-width:720px){.num{grid-template-columns:11rem 1fr;gap:24px;align-items:baseline}}
+.num strong{font-size:1.9rem;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.num span{color:var(--muted)}
+.bars{display:grid;gap:8px;margin:8px 0 0;max-width:40rem}
+.bar{display:grid;grid-template-columns:9rem 1fr 2.5rem;gap:12px;align-items:center;font-size:.92rem}
+.bar i{display:block;height:10px;background:var(--signal);border-radius:1px}
+.bar em{font-style:normal;text-align:right;color:var(--muted)}
+ul.plain{padding-left:1.1rem;margin:0}
+ul.plain li{margin:0 0 8px;color:var(--muted)}
+ul.plain li b{color:var(--ink);font-weight:600}
+.stack{display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:8px 0 0;list-style:none}
+.stack li{border:1px solid var(--rule);border-radius:4px;padding:3px 10px;font-size:.92rem;background:var(--surface)}
+footer.site{margin-top:96px;padding:28px 0 48px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--muted);font-size:.95rem}
+footer.site nav{display:flex;gap:20px;flex-wrap:wrap}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* index */
+.projects{list-style:none;padding:0;margin:8px 0 0;border-top:1px solid var(--rule)}
+.projects li{padding:24px 0;border-bottom:1px solid var(--rule)}
+.projects a.title{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;color:var(--ink);text-decoration:none}
+.projects a.title:hover{color:var(--signal)}
+.projects p{color:var(--muted);margin:6px 0 0;max-width:42rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="name" href="./">Dhruv Rungta</a>
+  <nav aria-label="Projects">
+    <a href="./teaser-triage/">Teaser Triage</a>
+    <a href="./deal-radar/">RA Deal Radar</a>
+    <a href="https://github.com/dhruvrungta/MAtCh">MAtCh</a>
+    <a href="https://github.com/dhruvrungta">GitHub</a>
+  </nav>
+</header>
+<main>
+<h1>Dhruv Rungta</h1>
+<p class="lede">IT undergraduate at VIT Vellore. I build small, working tools for real users, mostly with Claude Code.</p>
+<ul class="projects">
+  <li><a class="title" href="teaser-triage/">Teaser Triage</a><p>Screens cross-border M&amp;A teaser decks for India-relevant deals. 100% recall on 132 analyst-labelled slides, at $0.07 per 100 slides.</p></li>
+  <li><a class="title" href="deal-radar/">RA Deal Radar</a><p>A weekly India M&amp;A, PE and VC digest built from nine free public sources, emailed to Rungta Advisors' analysts every Monday at no running cost.</p></li>
+  <li><a class="title" href="https://github.com/dhruvrungta/MAtCh">MAtCh</a><p>A macOS menu-bar app that signs VIT students in to hostel Wi-Fi automatically. Used by 250+ students.</p></li>
+</ul>
+</main>
+<footer class="site">
+  <span>Dhruv Rungta, B.Tech IT at VIT Vellore</span>
+  <nav aria-label="Contact">
+    <a href="mailto:itzdhruvrungta@gmail.com">Email</a>
+    <a href="https://www.linkedin.com/in/dhruvrungta-95ba17289">LinkedIn</a>
+    <a href="https://github.com/dhruvrungta">GitHub</a>
+  </nav>
+</footer>
+</div>
+</body>
+</html>
