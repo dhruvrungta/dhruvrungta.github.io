@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Is Dhruv Busy?</title>
+<meta name="description" content="Is Dhruv in class right now?">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;800&display=swap" rel="stylesheet">
+<script>
+/* ============ EDIT THIS PART ============
+   TIMEZONE: where your classes happen (list: en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+   SCHEDULE: days are Mon Tue Wed Thu Fri Sat Sun, times are 24-hour "HH:MM".
+   NO_CLASS_DATES: holidays / breaks as "YYYY-MM-DD" (or "YYYY-MM-DD..YYYY-MM-DD" for a range). */
+const TIMEZONE = "America/New_York";
+const SCHEDULE = [
+  { name: "Economics",  days: ["Mon", "Wed"],        start: "09:00", end: "10:15" },
+  { name: "Statistics", days: ["Tue", "Thu"],        start: "11:00", end: "12:15" },
+  { name: "Finance",    days: ["Mon", "Wed", "Fri"], start: "14:00", end: "15:00" },
+];
+const NO_CLASS_DATES = [
+  "2026-11-25..2026-11-29",
+];
+/* ======================================== */
+</script>
+<style>
+:root{--bg:#F2F4F7;--card:#fff;--ink:#132033;--muted:#5A6577;--rule:#D2D8E0;
+  --busy:#C2410C;--busy-soft:#FDE7DC;--free:#15803D;--free-soft:#DCF5E4;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1622;--card:#152032;--ink:#E6EBF2;--muted:#9AA6B7;--rule:#29374D;
+  --busy:#FB923C;--busy-soft:#3A2214;--free:#4ADE80;--free-soft:#13301F;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E1622;--card:#152032;--ink:#E6EBF2;--muted:#9AA6B7;--rule:#29374D;
+  --busy:#FB923C;--busy-soft:#3A2214;--free:#4ADE80;--free-soft:#13301F;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);
+  font-family:"Schibsted Grotesk",system-ui,-apple-system,sans-serif;line-height:1.5;
+  display:flex;align-items:center;justify-content:center;padding:24px 16px}
+main{width:100%;max-width:30rem;text-align:center}
+.q{font-size:1.1rem;color:var(--muted);margin:0 0 12px}
+.status{border-radius:24px;padding:40px 20px;margin-bottom:20px}
+.status.busy{background:var(--busy-soft);color:var(--busy)}
+.status.free{background:var(--free-soft);color:var(--free)}
+.big{font-size:clamp(3.5rem,18vw,5.5rem);font-weight:800;line-height:1;margin:0}
+.sub{font-size:1.25rem;font-weight:600;margin:12px 0 0;color:var(--ink)}
+.detail{font-size:1rem;color:var(--muted);margin:6px 0 0}
+.today{background:var(--card);border:1px solid var(--rule);border-radius:16px;padding:16px 20px;text-align:left}
+.today h2{font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}
+.today ul{list-style:none;margin:0;padding:0}
+.today li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--rule)}
+.today li:first-child{border-top:0}
+.today li.now{font-weight:700;color:var(--busy)}
+.today li.done{color:var(--muted);text-decoration:line-through}
+.empty{color:var(--muted);margin:0}
+.foot{font-size:.85rem;color:var(--muted);margin-top:16px}
+</style>
+</head>
+<body>
+<main>
+  <p class="q">Is Dhruv in class right now?</p>
+  <div id="status" class="status"><p class="big">…</p></div>
+  <section class="today"><h2>Today's classes</h2><div id="list"></div></section>
+  <p class="foot" id="foot"></p>
+</main>
+<script>
+const DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const toMin = s => { const [h,m] = s.split(":").map(Number); return h*60+m; };
+const fmt = s => { let [h,m] = s.split(":").map(Number); const ap = h>=12?"pm":"am"; h = h%12||12;
+  return h + (m ? ":" + String(m).padStart(2,"0") : "") + ap; };
+const dur = mins => { const h = Math.floor(mins/60), m = mins%60;
+  return (h ? h + " hr" + (h>1?"s":"") + " " : "") + (m || !h ? m + " min" : "").trim(); };
+
+function nowThere(offsetDays = 0){
+  const d = new Date(Date.now() + offsetDays*864e5);
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:TIMEZONE,
+    year:"numeric",month:"2-digit",day:"2-digit",weekday:"short",hour:"2-digit",minute:"2-digit",hourCycle:"h23"})
+    .formatToParts(d).map(x => [x.type,x.value]));
+  return { date:`${p.year}-${p.month}-${p.day}`, day:p.weekday, mins:+p.hour*60 + +p.minute };
+}
+function isBreak(date){
+  return NO_CLASS_DATES.some(r => { const [a,b=a] = r.split(".."); return date >= a && date <= b; });
+}
+function classesOn(t){
+  if (isBreak(t.date)) return [];
+  return SCHEDULE.filter(c => c.days.includes(t.day)).sort((a,b) => toMin(a.start)-toMin(b.start));
+}
+function nextClass(t){
+  for (let i = 1; i <= 14; i++){
+    const d = nowThere(i), c = classesOn(d)[0];
+    if (c) return { c, label: i===1 ? "tomorrow" : d.day };
+  }
+}
+
+function render(){
+  const t = nowThere(), today = classesOn(t);
+  const cur = today.find(c => t.mins >= toMin(c.start) && t.mins < toMin(c.end));
+  const box = document.getElementById("status");
+  if (cur){
+    box.className = "status busy";
+    box.innerHTML = `<p class="big">Yes</p><p class="sub">In ${cur.name}</p>
+      <p class="detail">Free at ${fmt(cur.end)} (in ${dur(toMin(cur.end)-t.mins)})</p>`;
+  } else {
+    const later = today.find(c => toMin(c.start) > t.mins);
+    let detail;
+    if (later) detail = `Next class: ${later.name} at ${fmt(later.start)} (in ${dur(toMin(later.start)-t.mins)})`;
+    else { const n = nextClass(t); detail = n ? `No more classes today. Next: ${n.c.name}, ${n.label} at ${fmt(n.c.start)}` : "No classes coming up"; }
+    box.className = "status free";
+    box.innerHTML = `<p class="big">No</p><p class="sub">Free to talk</p><p class="detail">${detail}</p>`;
+  }
+  const list = document.getElementById("list");
+  list.innerHTML = today.length
+    ? "<ul>" + today.map(c => {
+        const cls = c === cur ? "now" : t.mins >= toMin(c.end) ? "done" : "";
+        return `<li class="${cls}"><span>${c.name}</span><span>${fmt(c.start)} – ${fmt(c.end)}</span></li>`;
+      }).join("") + "</ul>"
+    : `<p class="empty">${isBreak(t.date) ? "On break, no classes" : "No classes today"}</p>`;
+  const local = new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
+  document.getElementById("foot").textContent = `Your time: ${local} · Updates automatically`;
+}
+render();
+setInterval(render, 30000);
+</script>
+</body>
+</html>
