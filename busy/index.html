@@ -11,14 +11,42 @@
    TIMEZONE: where your classes happen (list: en.wikipedia.org/wiki/List_of_tz_database_time_zones)
    SCHEDULE: days are Mon Tue Wed Thu Fri Sat Sun, times are 24-hour "HH:MM".
    NO_CLASS_DATES: holidays / breaks as "YYYY-MM-DD" (or "YYYY-MM-DD..YYYY-MM-DD" for a range). */
-const TIMEZONE = "America/New_York";
+const TIMEZONE = "Asia/Kolkata";
 const SCHEDULE = [
-  { name: "Economics",  days: ["Mon", "Wed"],        start: "09:00", end: "10:15" },
-  { name: "Statistics", days: ["Tue", "Thu"],        start: "11:00", end: "12:15" },
-  { name: "Finance",    days: ["Mon", "Wed", "Fri"], start: "14:00", end: "15:00" },
+  // Monday
+  { name: "CONC1 (Intro)",      days: ["Mon"], start: "08:00", end: "08:50" },
+  { name: "MLS",                days: ["Mon"], start: "09:00", end: "09:50" },
+  { name: "DB",                 days: ["Mon"], start: "10:00", end: "10:50" },
+  { name: "HSM",                days: ["Mon"], start: "12:00", end: "12:50" },
+  { name: "CONC2 (Full Stack)", days: ["Mon"], start: "17:00", end: "17:50" },
+  // Tuesday
+  { name: "HSM",                days: ["Tue"], start: "09:00", end: "09:50" },
+  { name: "QQSP",               days: ["Tue"], start: "10:00", end: "10:50" },
+  { name: "ALL",                days: ["Tue"], start: "11:00", end: "11:50" },
+  { name: "CONC1 (Intro)",      days: ["Tue"], start: "12:00", end: "12:50" },
+  { name: "CONC2 (Full Stack)", days: ["Tue"], start: "14:00", end: "14:50" },
+  // Wednesday
+  { name: "ALL",                days: ["Wed"], start: "08:00", end: "08:50" },
+  { name: "CONC1 (Intro)",      days: ["Wed"], start: "09:00", end: "09:50" },
+  { name: "MLS",                days: ["Wed"], start: "10:00", end: "10:50" },
+  { name: "DB Lab",             days: ["Wed"], start: "14:00", end: "15:40" },
+  { name: "CONC2 (Full Stack)", days: ["Wed"], start: "18:00", end: "18:50" },
+  // Thursday
+  { name: "DB",                 days: ["Thu"], start: "08:00", end: "08:50" },
+  { name: "HSM",                days: ["Thu"], start: "10:00", end: "10:50" },
+  { name: "QQSP",               days: ["Thu"], start: "11:00", end: "11:50" },
+  { name: "ALL",                days: ["Thu"], start: "12:00", end: "12:50" },
+  { name: "CONC2 (Full Stack)", days: ["Thu"], start: "15:00", end: "15:50" },
+  // Friday
+  { name: "QQSP",               days: ["Fri"], start: "08:00", end: "08:50" },
+  { name: "ALL",                days: ["Fri"], start: "09:00", end: "09:50" },
+  { name: "CONC1 (Intro)",      days: ["Fri"], start: "10:00", end: "10:50" },
+  { name: "MLS",                days: ["Fri"], start: "11:00", end: "11:50" },
+  { name: "DB",                 days: ["Fri"], start: "12:00", end: "12:50" },
+  { name: "MLS Lab",            days: ["Fri"], start: "14:00", end: "15:40" },
 ];
 const NO_CLASS_DATES = [
-  "2026-11-25..2026-11-29",
+  // e.g. "2026-12-25" or "2026-12-20..2027-01-05"
 ];
 /* ======================================== */
 </script>
@@ -64,8 +92,10 @@ const DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const toMin = s => { const [h,m] = s.split(":").map(Number); return h*60+m; };
 const fmt = s => { let [h,m] = s.split(":").map(Number); const ap = h>=12?"pm":"am"; h = h%12||12;
   return h + (m ? ":" + String(m).padStart(2,"0") : "") + ap; };
-const dur = mins => { const h = Math.floor(mins/60), m = mins%60;
-  return (h ? h + " hr" + (h>1?"s":"") + " " : "") + (m || !h ? m + " min" : "").trim(); };
+const dur = mins => { const h = Math.floor(mins/60), m = mins%60, parts = [];
+  if (h) parts.push(h + (h > 1 ? " hrs" : " hr"));
+  if (m || !h) parts.push(m + " min");
+  return parts.join(" "); };
 
 function nowThere(offsetDays = 0){
   const d = new Date(Date.now() + offsetDays*864e5);
@@ -91,11 +121,19 @@ function nextClass(t){
 function render(){
   const t = nowThere(), today = classesOn(t);
   const cur = today.find(c => t.mins >= toMin(c.start) && t.mins < toMin(c.end));
+  // Group back-to-back classes (gap of 10 min or less) so short breaks still count as busy
+  const blocks = [];
+  for (const c of today){
+    const last = blocks[blocks.length-1];
+    if (last && toMin(c.start) - toMin(last.end) <= 10) last.end = c.end;
+    else blocks.push({ start: c.start, end: c.end });
+  }
+  const block = blocks.find(b => t.mins >= toMin(b.start) && t.mins < toMin(b.end));
   const box = document.getElementById("status");
-  if (cur){
+  if (block){
     box.className = "status busy";
-    box.innerHTML = `<p class="big">Yes</p><p class="sub">In ${cur.name}</p>
-      <p class="detail">Free at ${fmt(cur.end)} (in ${dur(toMin(cur.end)-t.mins)})</p>`;
+    box.innerHTML = `<p class="big">Yes</p><p class="sub">${cur ? "In " + cur.name : "Between classes"}</p>
+      <p class="detail">Free at ${fmt(block.end)} (in ${dur(toMin(block.end)-t.mins)})</p>`;
   } else {
     const later = today.find(c => toMin(c.start) > t.mins);
     let detail;
